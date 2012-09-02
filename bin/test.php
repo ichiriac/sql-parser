@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * This file is distributed under the MIT Open Source
+ * License. See README.MD for details.
+ * @author Ioan CHIRIAC
+ * @link https://github.com/ichiriac/sql-parser
+ */
 require_once __DIR__ . '/../src/Parser.php';
 
 $parser = new \beaba\storage\Parser();

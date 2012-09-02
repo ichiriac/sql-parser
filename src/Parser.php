@@ -1,6 +1,12 @@
 <?php
 
 namespace beaba\storage;
+/**
+ * This file is distributed under the MIT Open Source
+ * License. See README.MD for details.
+ * @author Ioan CHIRIAC
+ * @link https://github.com/ichiriac/sql-parser
+ */
 
 /**
  * Defines a parser exception
@@ -19,9 +25,7 @@ class UnsuportedMethod extends \Exception
 }
 
 /**
- * This file is distributed under the MIT Open Source
- * License. See README.MD for details.
- * @author Ioan CHIRIAC
+ * The SQL storage parser
  */
 class Parser
 {

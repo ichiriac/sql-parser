@@ -254,6 +254,10 @@ class Parser
                 if (is_array($props[$offset + 3])) {
                     $result[] = strtolower($props[$offset + 3]['$']);
                     $result[] = $this->parseCriteria($props[$offset + 3]['?']);
+                    $offset ++;
+                    if ( !empty($props[$offset + 3]) ) {
+                        $result[] = strtolower($props[$offset + 3]);
+                    }
                 } else {
                     $result[] = strtolower($props[$offset + 3]);
                 }

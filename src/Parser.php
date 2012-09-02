@@ -38,7 +38,6 @@ class Parser
         $size = count($tokens);
         $offset = 0;
         $result = $this->analyze($tokens, $size, $offset);
-        print_r($result);
         // parsing the result and analyse the request
         foreach ($result as $f => $prop) {
             switch ($f[0]) {
@@ -89,15 +88,16 @@ class Parser
      * @param array $props
      * @return array 
      */
-    protected function parseGroup( array $props ) {
+    protected function parseGroup(array $props)
+    {
         $result = array();
-        if ( strtolower($props[0]) === 'by') {
+        if (strtolower($props[0]) === 'by') {
             array_shift($props);
         }
         $len = count($props);
-        for($i = 0; $i < $len; $i+=2) {
+        for ($i = 0; $i < $len; $i+=2) {
             $result[] = $props[$i];
-            if ( !empty($props[$i + 1]) && $props[$i + 1] !== ',') {
+            if (!empty($props[$i + 1]) && $props[$i + 1] !== ',') {
                 throw new ParseException(
                     'Expect [,] to separe group by columns'
                 );
@@ -105,7 +105,7 @@ class Parser
         }
         return $result;
     }
-    
+
     /**
      * Parsing a list of orders statement
      * @param array $props
@@ -114,19 +114,19 @@ class Parser
     protected function parseOrders(array $props)
     {
         $result = array();
-        if ( strtolower($props[0]) === 'by') {
+        if (strtolower($props[0]) === 'by') {
             array_shift($props);
         }
         $len = count($props);
-        for($i = 0; $i < $len; $i+=2) {
+        for ($i = 0; $i < $len; $i+=2) {
             $item = array(
                 $props[$i]
             );
-            if ( !empty($props[$i + 1]) ) {
+            if (!empty($props[$i + 1])) {
                 $next = strtolower($props[$i + 1]);
-                if ( $next === ',' ) {
+                if ($next === ',') {
                     $item[] = true;
-                } elseif ( $next === 'asc' || $next === 'desc' ) {
+                } elseif ($next === 'asc' || $next === 'desc') {
                     $i++;
                     $item[] = $next === 'asc';
                 } else {
@@ -134,7 +134,7 @@ class Parser
                         'Unexpected order token ' . $next
                     );
                 }
-                if ( !empty($props[$i + 1]) && $props[$i + 1] !== ',') {
+                if (!empty($props[$i + 1]) && $props[$i + 1] !== ',') {
                     throw new ParseException(
                         'Expect [,] to separe order columns'
                     );
@@ -210,8 +210,8 @@ class Parser
             $criteria = array(
                 'f' => $props[$offset]
             );
-            if ( is_array($props[$offset + 1]) ) {
-                $offset --;
+            if (is_array($props[$offset + 1])) {
+                $offset--;
                 $criteria['c'] = '';
             } else {
                 $criteria['c'] = strtolower($props[$offset + 1]);
@@ -238,7 +238,7 @@ class Parser
                     $criteria['c'] .= ' not';
                 }
             }
-            if ( is_array($props[$offset + 2]) ) {
+            if (is_array($props[$offset + 2])) {
                 $criteria['c'] .= strtolower($props[$offset + 2]['$']);
                 $criteria['v'] = $props[$offset + 2]['?'];
             } else {
@@ -470,7 +470,9 @@ class Parser
      * @param string $token
      * @return mixed
      */
-    protected function addToken( $token ) {
+    protected function addToken($token)
+    {
         return $token;
     }
+
 }

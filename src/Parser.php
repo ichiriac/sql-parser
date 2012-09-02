@@ -455,6 +455,8 @@ class Parser
                     if ($tok === '(') {
                         $tok = $this->analyze($tokens, $size, ++$offset);
                         $tok['$'] = array_pop($structure[$key]);
+                        $structure[$key][] = $tok;
+                        continue;
                     }
                     if ($tok === ')') {
                         return $structure;

@@ -41,9 +41,9 @@ class Parser
         $tokens = $this->tokenize($statement);
         $size = count($tokens);
         $offset = 0;
-        $result = $this->analyze($tokens, $size, $offset);
+        $result = array();
         // parsing the result and analyse the request
-        foreach ($result as $f => $prop) {
+        foreach ($this->analyze($tokens, $size, $offset) as $f => $prop) {
             switch ($f[0]) {
                 case '-':
                     switch ($f[1]) {
@@ -82,9 +82,22 @@ class Parser
                 case 'l':
                     $result[$f] = $this->parseLimit($prop);
                     break;
+                default:
+                    list($f, $prop) = $this->handleParse($f, $prop);
+                    $result[$f] = $prop;
             }
         }
         return $result;
+    }
+
+    /**
+     * Automatically parse the data
+     * @param string $method
+     * @param array $props
+     * @return array 
+     */
+    protected function handleParse( $method, $props ) {
+        return array( $method, $props );
     }
 
     /**
@@ -419,62 +432,73 @@ class Parser
             $offset++;
         // building a parsing tree
         $structure = array();
-        $j = 0;
         for (; $offset < $size; $offset++) {
             $tok = $tokens[$offset];
-            switch (strtolower($tok)) {
-                case 'with':
-                    $key = '+';
-                    break;
-                case 'from':
-                    $key = 'f';
-                    break;
-                case 'inner':
-                case 'outter':
-                case 'left':
-                case 'right':
-                    if (strtolower($tokens[$offset + 1]) === 'join') {
-                        $offset++;
-                        $key = 'j' . ($j++);
-                        $structure[$key] = array(strtolower($tok));
-                    } else {
-                        $structure[$key][] = $tok;
-                    }
-                    break;
-                case 'join':
-                    $key = 'j' . ($j++);
-                    $structure[$key] = array('left');
-                    break;
-                case 'where':
-                    $key = 'w';
-                    break;
-                case 'order':
-                    $key = 'o';
-                    break;
-                case 'limit':
-                    $key = 'l';
-                    break;
-                case 'group':
-                    $key = 'g';
-                    break;
-                default:
-                    if (empty($structure[$key]))
-                        $structure[$key] = array();
-                    if ($tok === '(') {
-                        $tok = $this->analyze($tokens, $size, ++$offset);
-                        $tok['$'] = array_pop($structure[$key]);
-                        $structure[$key][] = $tok;
-                        continue;
-                    }
-                    if ($tok === ')') {
-                        return $structure;
-                    }
-                    $structure[$key][] = $this->addToken($tok);
+            if ( $k = $this->isKeyword(
+                strtolower($tok), $tokens, $offset, $structure
+            ) ) {
+                $key = $k;
+            } else {
+                if (empty($structure[$key]))
+                    $structure[$key] = array();
+                if ($tok === '(') {
+                    $tok = $this->analyze($tokens, $size, ++$offset);
+                    $tok['$'] = array_pop($structure[$key]);
+                    $structure[$key][] = $tok;
+                    continue;
+                }
+                if ($tok === ')') {
+                    return $structure;
+                }
+                $structure[$key][] = $this->addToken($tok);
             }
         }
         return $structure;
     }
 
+    /**
+     * @var integer Join incrementation
+     */
+    private $j = 0;
+    
+    /**
+     * Check if the specified token is a keyword
+     * @param string $token
+     * @param integer $offset
+     * @param array $structure
+     * @return string 
+     */
+    protected function isKeyword( $token, &$tokens, &$offset, &$structure ) {
+        switch ( $token ) {
+            case 'from':
+                return 'f';
+            case 'inner':
+            case 'outter':
+            case 'left':
+            case 'right':
+                if (strtolower($tokens[$offset + 1]) === 'join') {
+                    $offset++;
+                    $key = 'j' . ($this->j++);
+                    $structure[$key] = array( $token );
+                    return $key;
+                } else {
+                    return false;
+                }
+            case 'join':
+                $key = 'j' . ($j++);
+                $structure[$key] = array('left');
+                return $key;
+            case 'where':
+                return 'w';
+            case 'order':
+                return 'o';
+            case 'limit':
+                return 'l';
+            case 'group':
+                return 'g';
+        }
+        return false;
+    }
     /**
      * Add a token
      * @param string $token
